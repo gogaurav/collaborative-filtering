@@ -1,9 +1,13 @@
 import collaborative_filtering as cf
 from copy import deepcopy
 
-k = [1, 20]
-user_idx = 19
+""" For running the functions in collaborative filtering module and also 
+    displaying some of the results for collaborative filtering """
 
+k = [1, 20]  # enter here the k range for which true_positive_rate vs k have to be plotted
+user_idx = 19  # User no. for which recommendations have to be found out (user ids start from 0)
+
+# read the dataset: user-shows.txt and shows.txt; files should be in same folder as the code files
 with open('user-shows.txt', 'r') as f:
     user_shows = cf.np.loadtxt(f)
     user_shows = user_shows.astype(int)
@@ -16,8 +20,10 @@ with open('shows.txt', 'r') as f:
 shows = cf.np.array(shows_list)
 del shows_list
 
+""" user_shows_modified would have the first 100 shows of the user_idx user as 0
+    for making comparisons with the original user record """
 user_shows_modified = deepcopy(user_shows)
-user_shows_modified[19][:100] = 0
+user_shows_modified[user_idx][:100] = 0
 
 item_item_recommend_matrix = cf.item_item_recommend(user_shows_modified)
 user_user_recommend_matrix = cf.user_user_recommend(user_shows_modified)
@@ -40,6 +46,7 @@ itm_true_positive_rate_vs_k = cf.find_true_positive_rate_vs_k(item_item_recommen
 
 cf.plot_true_positive_rate_vs_k(usr_true_positive_rate_vs_k, itm_true_positive_rate_vs_k)
 
+# getting top 10 shows' recommendation based on item-item and user-user with the original dataset
 item_item_recommend_matrix = cf.item_item_recommend(user_shows)
 user_user_recommend_matrix = cf.user_user_recommend(user_shows)
 user_user_top10_shows_scores = cf.find_top_k_shows(user_idx, 10, user_user_recommend_matrix)
@@ -53,7 +60,7 @@ user_user = []
 for show_idx, sim_score in user_user_top10_shows_scores:
     user_user.append(show_idx)
 
-# MyMedialite Library Results
+# MyMedialite Library Results for top 10 shows; found out separately by running the library in cmd
 itemknn = [234, 48, 37, 543, 490, 477, 280, 553, 489, 222]
 wrmf = [48,	77,	192, 208, 195,	280, 207, 222, 219,	489]
 
