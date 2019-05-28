@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from sklearn.metrics import pairwise as pw
 from operator import itemgetter
 import matplotlib.pyplot as plt
@@ -12,7 +13,7 @@ def item_item_recommend(user_shows):
     :param user_shows: User-Item rating 2D array
     :return: recommender matrix - numpy 2D array
     """
-    s_i = pw.cosine_similarity(np.transpose(user_shows))
+    s_i = pw.cosine_similarity(np.transpose(user_shows.values))
     return np.matmul(user_shows, s_i)
 
 
@@ -23,7 +24,7 @@ def user_user_recommend(user_shows):
     :param user_shows: User-Item rating 2D array
     :return: recommender matrix - numpy 2D array
     """
-    s_u = pw.cosine_similarity(user_shows)
+    s_u = pw.cosine_similarity(user_shows.values)
     return np.matmul(s_u, user_shows)
 
 
