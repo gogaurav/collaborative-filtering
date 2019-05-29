@@ -5,7 +5,6 @@ from operator import itemgetter
 import matplotlib.pyplot as plt
 from scipy.stats.stats import kendalltau
 
-
 def item_item_recommend(user_shows):
     """
     Item-Item Similarity through cosine similarity(Si) and User-Item rating matrix(R)
@@ -61,12 +60,12 @@ def find_true_positive_rate_vs_k(recommend_matrix, user_shows, user_idx, k):
     :return: list having true_positive_rate and corresponding k
     """
     true_positive_rate_vs_k = []
-    no_first_100_shows_watched = np.count_nonzero(user_shows[user_idx][:100])
+    no_first_100_shows_watched = np.count_nonzero(user_shows.loc[user_idx][:100].values)
     for i in range(*k):
         shows_sim_scores = find_top_k_shows(user_idx, i, recommend_matrix, 100)
         recommended_shows = [s[0] for s in shows_sim_scores]
         recommended_shows = np.array(recommended_shows)
-        no_rec_shows_watched = np.count_nonzero(user_shows[19][recommended_shows])
+        no_rec_shows_watched = np.count_nonzero(user_shows.loc[19][recommended_shows].values)
         true_positive_rate_vs_k.append([i, (no_rec_shows_watched / no_first_100_shows_watched)])
 
     return np.array(true_positive_rate_vs_k)
