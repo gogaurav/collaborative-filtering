@@ -6,14 +6,13 @@ import argparse
 """ For running the functions in collaborative filtering module and also 
     displaying some of the results for collaborative filtering """
 
-# TODO : User inputs, scaling 5 rating
 
-
-def read_file(file_name, delim=',', cols=None, header='infer'):
-    if cols is None:
-        return pd.read_csv(file_name, sep=delim, header=header)
+def read_file(file_name, delim=',', header='infer', sparse=False):
+    if sparse:
+        df = pd.read_csv(file_name, sep=delim, header=header)
+        return df.pivot(index=df.columns[0], columns=df.columns[1], values=df.columns[2]).fillna(0.0)
     else:
-        return pd.read_csv(file_name, sep=delim, usecols=cols, header=header)
+        return pd.read_csv(file_name, sep=delim, header=header)
 
 
 parser = argparse.ArgumentParser(description='Collaborative_Filtering')
@@ -21,15 +20,38 @@ parser.add_argument('ratings_file',
                     help='Ratings file name/ path(File should be without col names)')
 parser.add_argument('-s', '--shows_names_file',
                     help='File having mapping shows\' id and shows\' name')
+parser.add_argument('-d', '--delimiter', default=',',
+                    help='Separator in the file(default value comma. Enter s in case of space/ tab)')
+parser.add_argument('-hh', '--has_header', default='infer',
+                    help='Whether File has header(column names); Default yes, Enter y/n for yes/ no')
 parser.add_argument('-u', '--User_id', type=int, default=1,
                     help='User Id for which you need recommendation (Default 1st User)')
 parser.add_argument('-k', '--k_in_top_k', type=int, default=5,
                     help='No. of recommendations (Default 5); top k recommendations')
+parser.add_argument('-sp', '--sparse', default='n',
+                    help='Dataset is sparse or not (Default no), enter y for yes, n for no'
+                         ' (In Sparse Dataset, 1st column would come as indices, 2nd would'
+                         ' come as cols, 3rd as values)')
 args = parser.parse_args()
 
-user_shows = read_file(args.ratings_file, delim=r'\s+', header=None)
+if args.has_header in {'n', 'N', 'No'}:
+    header = None
+else:
+    header = 'infer'
+
+if args.sparse in {'y', 'Y', 'Yes'}:
+    data_sparse = True
+else:
+    data_sparse = False
+
+if args.delimiter == 's':
+    user_shows = read_file(args.ratings_file, delim=r'\s+', header=header, sparse=data_sparse)
+else:
+    user_shows = read_file(args.ratings_file, delim=args.delimiter, header=header, sparse=data_sparse)
+
 if args.shows_names_file is not None:
     shows = read_file(args.shows_names_file, header=None)
+
 k = [1, 20]  # enter here the k range for which true_positive_rate vs k have to be plotted
 user_idx = args.User_id  # User no. for which recommendations have to be found out (user ids start from 0)
 
@@ -81,30 +103,37 @@ user_user = []
 for show_idx, sim_score in user_user_top10_shows_scores:
     user_user.append(show_idx)
 
-# MyMedialite Library Results for top 10 shows; found out separately by running the library in cmd
-itemknn = [234, 48, 37, 543, 490, 477, 280, 553, 489, 222]
-wrmf = [48,	77,	192, 208, 195,	280, 207, 222, 219,	489]
-
-compare_ii_uu_itemknn_wrfm = [[item_item[i], user_user[i], itemknn[i], wrmf[i]] for i in range(10)]
-
-print("\n*** Recommendation with various methods for user {0} with original dataset: ***".format(user_idx))
-print("{0:^10s}{1:^10s}{2:^10s}{3:^10s}".format('Item-Item', 'User-User', 'ItemKNN', 'WRMF'))
-for i in compare_ii_uu_itemknn_wrfm:
+compare_ii_uu = [[item_item[i], user_user[i]] for i in range(10)]
+print("\n*** Recommendation with Item-Item & User-User for user {0} with original dataset: ***".format(user_idx))
+print("{0:^10s}{1:^10s}".format('Item-Item', 'User-User'))
+for i in compare_ii_uu:
     for j in i:
         print("{0:^10d}".format(j), end='')
     print()
+# # MyMedialite Library Results for top 10 shows; found out separately by running the library in cmd
+# itemknn = [234, 48, 37, 543, 490, 477, 280, 553, 489, 222]
+# wrmf = [48,	77,	192, 208, 195,	280, 207, 222, 219,	489]
 
-print()
-all_recommend_show_ids = {*item_item, *user_user, *itemknn, *wrmf}
-print("{0:^10s}{1:^s}".format('ShowID', 'ShowName'))
-for i in sorted(all_recommend_show_ids):
-    try:
-        print("{0:^10d} - {1}".format(i, shows.loc[i][0]))
-    except NameError:
-        print("{0:^10d} - {1}".format(i, 'N/A'))
+# compare_ii_uu_itemknn_wrfm = [[item_item[i], user_user[i], itemknn[i], wrmf[i]] for i in range(10)]
 
-
-cf.kendall_rank_correlation(item_item, user_user, itemknn, wrmf)
+# print("\n*** Recommendation with various methods for user {0} with original dataset: ***".format(user_idx))
+# print("{0:^10s}{1:^10s}{2:^10s}{3:^10s}".format('Item-Item', 'User-User', 'ItemKNN', 'WRMF'))
+# for i in compare_ii_uu_itemknn_wrfm:
+#     for j in i:
+#         print("{0:^10d}".format(j), end='')
+#     print()
+#
+# print()
+# all_recommend_show_ids = {*item_item, *user_user, *itemknn, *wrmf}
+# print("{0:^10s}{1:^s}".format('ShowID', 'ShowName'))
+# for i in sorted(all_recommend_show_ids):
+#     try:
+#         print("{0:^10d} - {1}".format(i, shows.loc[i][0]))
+#     except NameError:
+#         print("{0:^10d} - {1}".format(i, 'N/A'))
+#
+#
+# cf.kendall_rank_correlation(item_item, user_user, itemknn, wrmf)
 
 
 

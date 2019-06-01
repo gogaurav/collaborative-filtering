@@ -65,7 +65,7 @@ def find_true_positive_rate_vs_k(recommend_matrix, user_shows, user_idx, k):
         shows_sim_scores = find_top_k_shows(user_idx, i, recommend_matrix, 100)
         recommended_shows = [s[0] for s in shows_sim_scores]
         recommended_shows = np.array(recommended_shows)
-        no_rec_shows_watched = np.count_nonzero(user_shows.loc[19][recommended_shows].values)
+        no_rec_shows_watched = np.count_nonzero(user_shows.loc[user_idx][recommended_shows].values)
         true_positive_rate_vs_k.append([i, (no_rec_shows_watched / no_first_100_shows_watched)])
 
     return np.array(true_positive_rate_vs_k)
