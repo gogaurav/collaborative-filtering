@@ -1,4 +1,4 @@
-# collaborative-filtering
+# collaborative-filtering (Recommender System)
 User-User and Item-Item Collaborative Filtering (Cosine similarity used for finding similarity in both cases)
 
 Supports both Sparse and Dense format dataset.
